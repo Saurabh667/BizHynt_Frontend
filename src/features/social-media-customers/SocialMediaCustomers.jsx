@@ -1,0 +1,49 @@
+import {CUSTOMER_STATUSES} from './customer-status';
+import {useEffect,useMemo,useState} from 'react';
+import {Link,useNavigate} from 'react-router-dom';
+import {Activity,ArrowLeft,ArrowRight,CheckCircle2,ChevronDown,Download,Eye,Pencil,Grid2X2,LayoutList,Link2,MoreVertical,Plus,Search,ShieldCheck,Users,X} from 'lucide-react';
+import {socialApi} from './api';
+import './workspace.css';
+
+const date = value => value ? new Date(value).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const initials=name=>(name||'?').trim().charAt(0).toUpperCase();
+const csvCell=value=>'"'+String(value??'').replaceAll('"','""')+'"';
+function downloadCsv(rows){
+ const lines=[['Customer','Category','Handled by','Status','Accounts','Created','Updated'],...rows.map(c=>[c.name,c.businessCategory,c.handledBy,c.status,c._count?.accounts??0,date(c.createdAt),date(c.updatedAt)])];
+ const blob=new Blob(['\ufeff',lines.map(row=>row.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+ const href=URL.createObjectURL(blob);const link=document.createElement('a');link.href=href;link.download='social-media-customers-page.csv';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(href),5000);
+}
+export default function SocialMediaCustomers(){
+ const nav=useNavigate();const [query,setQuery]=useState(''),[page,setPage]=useState(1),[result,setResult]=useState({items:[],total:0}),[loading,setLoading]=useState(true),[error,setError]=useState(''),[refresh,setRefresh]=useState(0);
+ const [status,setStatus]=useState('all'),[manager,setManager]=useState('all'),[view,setView]=useState('table');
+ const [updating,setUpdating]=useState([]),[notice,setNotice]=useState('');
+ async function changeStatus(customer,next){
+  if(customer.status===next)return;
+  setUpdating(ids=>[...ids,customer.id]);setNotice('');
+  try{await socialApi.update(customer.id,{status:next});setResult(previous=>({...previous,items:previous.items.map(c=>c.id===customer.id?{...c,status:next}:c)}));setNotice(`${customer.name} status updated to ${next}.`)}
+  catch(e){setError(e?.response?.data?.message||'Status change failed. No changes were saved.')}
+  finally{setUpdating(ids=>ids.filter(id=>id!==customer.id))}
+ }
+ useEffect(()=>{let live=true;setLoading(true);setError('');const id=setTimeout(()=>socialApi.list(query,page).then(data=>{if(live)setResult(data)}).catch(err=>{if(live)setError(err.response?.data?.message||'Could not load customers. Please retry.')}).finally(()=>{if(live)setLoading(false)}),250);return()=>{live=false;clearTimeout(id)}},[query,page,refresh]);
+ const items=result.items||[];
+ const managers=useMemo(()=>Array.from(new Set(items.map(c=>c.handledBy).filter(Boolean))).sort(),[items]);
+ const visible=useMemo(()=>items.filter(c=>(status==='all'||String(c.status).toLowerCase()===status)&&(manager==='all'||c.handledBy===manager)),[items,status,manager]);
+ const active=items.filter(c=>c.status==='active').length;const inactive=items.filter(c=>c.status==='inactive').length;const accountCount=items.reduce((sum,c)=>sum+(c._count?.accounts??0),0);
+ const reset=()=>{setQuery('');setStatus('all');setManager('all');setPage(1)};
+ const isFiltered=status!=='all'||manager!=='all';
+ const stats=[{label:'Customers on page',value:items.length,sub:`${result.total} total matching search`,icon:Users,tone:'sky'},{label:'Active on page',value:active,sub:'Currently active',icon:CheckCircle2,tone:'mint'},{label:'Inactive on page',value:inactive,sub:'Currently inactive',icon:Activity,tone:'amber'},{label:'Accounts on page',value:accountCount,sub:'Managed social profiles',icon:Link2,tone:'violet'}];
+ return <main className="smw space-y-5"><div className="smw-crumb"><Link to="/admin/dashboard">Dashboard</Link><ArrowRight size={13}/> Social Media Customers</div>
+ <header className="smw-heading"><div className="smw-heading-left"><span className="smw-hero-icon"><Users size={27}/></span><div><h1>Social Media Customers</h1><p>Manage clients, their social accounts and contracts in one place.</p></div></div><button className="smw-primary" onClick={()=>nav('/admin/social-media-customers/new')}><Plus size={19}/> Add Customer</button></header>
+ <section className="smw-stats">{stats.map(s=><div key={s.label} className={`smw-stat smw-${s.tone}`}><span className="smw-stat-icon"><s.icon size={23}/></span><div><p>{s.label}</p><strong>{s.value}</strong><small>{s.sub}</small></div></div>)}</section>
+ <section className="smw-panel smw-filters" aria-label="Customer filters"><label className="smw-search"><Search size={19}/><input aria-label="Search customers by name" placeholder="Search customers by business name…" value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}}/></label><label className="smw-select">Status<select value={status} onChange={e=>setStatus(e.target.value)}><option value="all">All statuses</option>{CUSTOMER_STATUSES.map(s=><option key={s.value} value={s.value}>{s.label}</option>)}</select><ChevronDown size={14}/></label><label className="smw-select">Managed by<select value={manager} onChange={e=>setManager(e.target.value)}><option value="all">All managers</option>{managers.map(m=><option key={m} value={m}>{m}</option>)}</select><ChevronDown size={14}/></label><button className="smw-button" onClick={reset}>Reset</button></section>
+ <section className="smw-panel smw-directory"><div className="smw-section-head"><div className="smw-section-title"><span className="smw-mini-icon"><Users size={21}/></span><div><h2>Customers <span>({result.total})</span></h2><p>Find and manage your social media clients</p></div></div><div className="smw-actions"><button className="smw-button" disabled={!visible.length} onClick={()=>downloadCsv(visible)} title="Export customers currently displayed"><Download size={16}/> Export CSV</button><div className="smw-toggle" aria-label="Display mode"><button title="Table view" aria-pressed={view==='table'} className={view==='table'?'selected':''} onClick={()=>setView('table')}><LayoutList size={18}/></button><button title="Card view" aria-pressed={view==='cards'} className={view==='cards'?'selected':''} onClick={()=>setView('cards')}><Grid2X2 size={18}/></button></div></div></div>
+ {notice&&<p className="smw-hint" role="status">{notice}</p>}
+ {error&&<div className="smw-error" role="alert">{String(error)} <button onClick={()=>setRefresh(n=>n+1)}>Retry</button></div>}
+ {isFiltered&&<p className="smw-hint">Status and manager filters apply to this page of results. Search matches customers across the directory.</p>}
+ {view==='table'?<div className="smw-table-wrap"><table className="smw-table"><thead><tr><th>Customer</th><th>Social accounts</th><th>Status</th><th>Handled by</th><th>Created</th><th>Updated</th><th className="smw-right">Action</th></tr></thead><tbody>{visible.map((c,index)=><tr key={c.id}><td><div className="smw-name-cell"><div className={`smw-avatar smw-avatar-${index%5}`}>{initials(c.name)}</div><div><Link to={`/admin/social-media-customers/${c.id}`} className="smw-customer-name">{c.name}</Link><small>{c.businessCategory||`Customer #${c.id}`}</small></div></div></td><td><span className="smw-count"><Link2 size={14}/>{c._count?.accounts??0} {(c._count?.accounts??0)===1?'account':'accounts'}</span></td><td><select className="smw-inline-status" aria-label={`Change status for ${c.name}`} title="Update status" disabled={updating.includes(c.id)} value={c.status} onChange={e=>changeStatus(c,e.target.value)}>{CUSTOMER_STATUSES.map(s=><option key={s.value} value={s.value}>{s.label}</option>)}</select></td><td>{c.handledBy||<span className="smw-muted">Unassigned</span>}</td><td className="smw-muted">{date(c.createdAt)}</td><td className="smw-muted">{date(c.updatedAt)}</td><td className="smw-right"><div className="smw-row-actions"><Link className="smw-outline-action" to={`/admin/social-media-customers/${c.id}`}><Eye size={16}/> View</Link><Link className="smw-outline-action" to={`/admin/social-media-customers/${c.id}/edit`}><Pencil size={16}/> Edit</Link></div></td></tr>)}</tbody></table></div>:<div className="smw-customer-grid">{visible.map((c,index)=><div className="smw-customer-card" key={c.id}><div className="smw-card-top"><span className={`smw-avatar smw-avatar-${index%5}`}>{initials(c.name)}</span><span className={`smw-status ${`is-${c.status}`}`}><span/>{c.status}</span></div><h3>{c.name}</h3><p>{c.businessCategory||'Social media customer'}</p><div><span><Link2 size={15}/>{c._count?.accounts??0} accounts</span><span>{c.handledBy||'Unassigned'}</span></div><small>Created {date(c.createdAt)}</small><div className="smw-card-action-row"><select className="smw-inline-status" aria-label={`Change status for ${c.name}`} disabled={updating.includes(c.id)} value={c.status} onChange={e=>changeStatus(c,e.target.value)}>{CUSTOMER_STATUSES.map(s=><option key={s.value} value={s.value}>{s.label}</option>)}</select><Link to={`/admin/social-media-customers/${c.id}`}>View</Link><Link to={`/admin/social-media-customers/${c.id}/edit`}>Edit</Link></div></div>)}</div>}
+ {loading&&<p className="smw-empty">Loading customers…</p>}{!loading&&!visible.length&&<p className="smw-empty">No customers match your search or filters.</p>}
+ <footer className="smw-pagination"><span>{visible.length} shown · {result.total} matching customers</span><div><button disabled={page===1||loading} onClick={()=>setPage(p=>Math.max(1,p-1))} aria-label="Previous page"><ArrowLeft size={17}/></button><strong>Page {page}</strong><button disabled={page*20>=result.total||loading} onClick={()=>setPage(p=>p+1)} aria-label="Next page"><ArrowRight size={17}/></button></div></footer></section>
+ <p className="smw-footnote"><ShieldCheck size={15}/> Restricted to authorized administrators. Credentials are never shown in the customer directory.</p>
+
+ </main>;
+}

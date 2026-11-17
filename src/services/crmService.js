@@ -1,0 +1,18 @@
+import api from './api';
+export const getDomains=async()=> (await api.get('/domains')).data;
+export const getDomainEligibleAssignees=async(id)=> (await api.get(`/domains/${id}/eligible-assignees`)).data;
+export const createDomain=async(data)=> (await api.post('/domains',data)).data;
+export const updateDomain=async(id,data)=> (await api.patch(`/domains/${id}`,data)).data;
+export const setDomainActive=async(id,isActive)=> (await api.patch(`/domains/${id}/active`,{isActive})).data;
+export const getUserDeactivationImpact=async(id)=> (await api.get(`/auth/users/${id}/deactivation-impact`)).data;
+export const setUserActive=async(id,isActive,options={})=> (await api.patch(`/auth/users/${id}/active`,{isActive,...options})).data;
+export const getUsers=async()=> (await api.get('/auth/users')).data;
+export const getTeams=async()=> (await api.get('/teams')).data;
+export const getTeam=async(id)=> (await api.get(`/teams/${id}`)).data;
+export const createTeam=async(data)=> (await api.post('/teams',data)).data;
+export const updateTeam=async(id,data)=> (await api.put(`/teams/${id}`,data)).data;
+export const assignTeamLeads=async(id,data)=> (await api.post(`/teams/${id}/assign`,data)).data;
+export const getCustomers=async()=> (await api.get('/customers')).data;
+export const updateCustomer=async(id,data)=> (await api.patch(`/customers/${id}`,data)).data;
+export const getCustomer=async(id)=> (await api.get(`/customers/${id}`)).data;
+export const convertLead=async(id,data)=> (await api.post(`/customers/from-lead/${id}`,data)).data;

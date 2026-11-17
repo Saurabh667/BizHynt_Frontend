@@ -1,0 +1,28 @@
+import api from '../../services/api';
+const base='/social-media-customers';
+export const socialApi={
+ platforms:()=>api.get(`${base}/platforms`).then(r=>r.data),
+ managePlatforms:()=>api.get(`${base}/platforms/manage`).then(r=>r.data),
+ addPlatform:data=>api.post(`${base}/platforms`,data).then(r=>r.data),
+ editPlatform:(id,data)=>api.patch(`${base}/platforms/${id}`,data).then(r=>r.data),
+ categories:()=>api.get(`${base}/business-categories`).then(r=>r.data),
+ createCategory:name=>api.post(`${base}/business-categories`,{name}).then(r=>r.data),
+ updateCategory:(id,name)=>api.patch(`${base}/business-categories/${id}`,{name}).then(r=>r.data),
+ list:(search='',page=1)=>api.get(base,{params:{search,page}}).then(r=>r.data),
+ get:id=>api.get(`${base}/${id}`).then(r=>r.data),
+ create:data=>api.post(base,data).then(r=>r.data),
+ update:(id,data)=>api.patch(`${base}/${id}`,data).then(r=>r.data),
+ archive:id=>api.delete(`${base}/${id}`).then(r=>r.data),
+ addAccount:(id,data)=>api.post(`${base}/${id}/accounts`,data).then(r=>r.data),
+ editAccount:(id,aid,data)=>api.patch(`${base}/${id}/accounts/${aid}`,data).then(r=>r.data),
+ archiveAccount:(id,aid)=>api.delete(`${base}/${id}/accounts/${aid}`).then(r=>r.data),
+ versions:(id,aid)=>api.get(`${base}/${id}/accounts/${aid}/versions`).then(r=>r.data),
+ reveal:(id,aid,vid,loginPassword,reason)=>api.post(`${base}/${id}/accounts/${aid}/versions/${vid}/reveal`,{loginPassword,reason}).then(r=>r.data),
+ terms:()=>api.get('/social-media/terms').then(r=>r.data),
+ termsHistory:()=>api.get('/social-media/terms/history').then(r=>r.data),
+ saveTerms:data=>api.post('/social-media/terms',data).then(r=>r.data),
+ contracts:id=>api.get(`/social-media/customers/${id}/contracts`).then(r=>r.data),
+ generateContract:(id,data)=>api.post(`/social-media/customers/${id}/contracts`,data).then(r=>r.data),
+ downloadContract:(id,contractId)=>api.get(`/social-media/customers/${id}/contracts/${contractId}/pdf`,{responseType:'blob'}).then(r=>r.data),
+ history:(id,page=1)=>api.get(`${base}/${id}/history`,{params:{page}}).then(r=>r.data),
+};
