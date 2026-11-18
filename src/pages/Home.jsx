@@ -46,7 +46,7 @@ function Home() {
                 <h1 className="
               font-bold
             ">
-                  <a href="#home">SALES GENERATOR</a>
+                  <a href="#home">BizHynt</a>
 
                 </h1>
 
@@ -1092,7 +1092,7 @@ function Home() {
                 <h1 className="
               font-bold
             ">
-                  <a href="#home">SALES GENERATOR</a>
+                  <a href="#home">BizHynt</a>
 
                 </h1>
 

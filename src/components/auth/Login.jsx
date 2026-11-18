@@ -17,7 +17,7 @@ import ThemeToggle from "../common/ThemeToggle";
 import logo from '../../assets/logo_transparent.png'
 import quoteSlide from "../../data/slideQuotes.json"
 
-const slides=quoteSlide;
+const slides = quoteSlide;
 
 function Login() {
   const navigate = useNavigate();
@@ -34,8 +34,8 @@ function Login() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [quoteSlide] = useState(
-  () => Math.floor(Math.random() * slides.length)
-);
+    () => Math.floor(Math.random() * slides.length)
+  );
   /*
    * -----------------------------------------
    * AUTH API LOGIC
@@ -115,7 +115,7 @@ function Login() {
 
                 {/* CRM - Top Center */}
                 <h1 className="absolute left-1/2 top-25 -translate-x-1/2 text-[110px] font-black leading-none tracking-tight text-white xl:text-7xl">
-                  CRM
+                  BizHynt
                 </h1>
 
                 {/* Bottom Center Content */}
@@ -151,12 +151,19 @@ function Login() {
             {/* Logo */}
 
             <div className="mb-7 text-center">
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-xl  text-xl font-black text-white  mx-auto">
+              {/* <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-xl  text-xl font-black text-white  mx-auto">
                 <img src={logo} alt="" />
+              </div> */}
+              <div className="mb-5 flex items-center justify-center mx-auto w-full">
+                <img
+                  src={logo}
+                  alt="BizHynt Logo"
+                  className="h-auto w-56 max-w-full object-contain"
+                />
               </div>
 
               <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Welcome to SALES GENERATOR
+                Welcome to BizHynt
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
@@ -299,7 +306,7 @@ function Login() {
 
             {/* Footer */}
             <p className="mt-8 text-center text-[11px] text-slate-400">
-              © {new Date().getFullYear()} SALES GENERATOR. All rights reserved.
+              © {new Date().getFullYear()} BizHynt. All rights reserved.
             </p>
           </div>
         </div>

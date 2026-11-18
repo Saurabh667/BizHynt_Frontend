@@ -37,7 +37,7 @@ function SuperAdminSidebar({ isOpen, onClose }) {
             </div>
 
             <div>
-              <h1 className="font-bold">SALES GENERATOR</h1>
+              <h1 className="font-bold">BizHynt</h1>
               <p className="text-xs text-slate-400">Platform Admin</p>
             </div>
           </div>

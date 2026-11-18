@@ -197,7 +197,7 @@ export default function Navbar({ onMenuClick = () => {} }) {
 
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-900 dark:text-white sm:text-base">
-              SALES GENERATOR Workspace
+              BizHynt Workspace
             </h2>
 
             <p className="hidden text-xs text-slate-500 sm:block">

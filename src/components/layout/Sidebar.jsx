@@ -89,14 +89,14 @@ function Sidebar({ isOpen = false, onClose = () => { } }) {
               font-bold text-white
             ">
               {/* <Handshake size={20} /> */}
-              <img src={logo} alt="SALES GENERATOR" />
+              <img src={logo} alt="BizHynt" />
             </div>
 
             <div>
               <h1 className="
                 font-bold
               ">
-                <Link to="/admin/dashboard">SALES GENERATOR</Link>
+                <Link to="/admin/dashboard">BizHynt</Link>
 
               </h1>
 
